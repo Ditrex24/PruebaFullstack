@@ -14,7 +14,7 @@ const RegisterForm = () => {
     try {
       const response = await axios.post('/users/register', { username, email, password });
       console.log(response.data); 
-      alert("Usuario registrado correctamente"); // Alerta para éxito
+      alert("Usuario registrado correctamente"); 
       navigate('/login');
     } catch (error) {
       setError(error.response.data.message);

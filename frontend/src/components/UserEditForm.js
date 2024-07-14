@@ -1,60 +1,65 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
 import axios from '../axios';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const UserEditForm = () => {
   const { id } = useParams();
-  const history = useHistory();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await axios.get(`/users/${id}`);
-        const userData = response.data;
-        setUsername(userData.username);
-        setEmail(userData.email);
-        setLoading(false);
+        setUsername(response.data.username);
+        setEmail(response.data.email);
       } catch (error) {
-        console.error('Error fetching user:', error);
+        setError('Error fetching user');
       }
     };
-
     fetchUser();
   }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/users/${id}`, { username, email, password });
-      history.push(`/users/${id}`);  // Redirigir al usuario a la página de detalles después de actualizar
+      await axios.put(`/users/${id}`, { username, email });
+      navigate('/users');
     } catch (error) {
-      console.error('Error updating user:', error);
+      setError('Error updating user');
     }
   };
 
-  if (loading) {
-    return <p>Cargando usuario...</p>;
-  }
-
   return (
-    <div>
-      <h2>Editar Usuario</h2>
+    <div className="container">
+      <h2>Edit User</h2>
+      {error && <p className="alert">{error}</p>}
       <form onSubmit={handleSubmit}>
-        <label>Username:</label>
-        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
-        <br />
-        <label>Email:</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <br />
-        <label>Nueva Contraseña:</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <br />
-        <button type="submit">Actualizar</button>
+        <div className="form-group">
+          <label htmlFor="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit" className="btn-primary">Update</button>
       </form>
+      <button className="btn-secondary btn-small" onClick={() => navigate('/users')}>Cancel</button>
     </div>
   );
 };
